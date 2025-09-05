@@ -1,60 +1,80 @@
 START TRANSACTION;
 
 -- Drop existing tables 
-DROP TABLE IF EXISTS enrollments;
-DROP TABLE IF EXISTS students;
-DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS ticket_sales;
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS venues;
+DROP TABLE IF EXISTS full_event;
 
--- create students
-CREATE TABLE students (
-    student_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    age INT NOT NULL
+-- create venues
+CREATE TABLE venues (
+    venue_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
 );
 
--- Create corses
-CREATE TABLE courses (
-    course_id INT AUTO_INCREMENT PRIMARY KEY,
-    course_name VARCHAR(100) NOT NULL,
-    credits INT NOT NULL
+-- Create ticket_sales
+CREATE TABLE ticket_sales (
+    sale_id INT AUTO_INCREMENT PRIMARY KEY,
+    venue_id INT NOT NULL,
+    event_date TIMESTAMP NOT NULL,
+    number_sold INT NOT NULL,
+    FOREIGN KEY (venue_id) REFERENCES venues(venue_id)
 );
 
--- create enrollments
-CREATE TABLE enrollments (
-    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id INT NOT NULL,
-    course_id INT NOT NULL,
-    enrollment_date DATE NOT NULL,
+-- create bookings
+CREATE TABLE bookings (
+    booking_id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(40) NOT NULL,
+    last_name VARCHAR(40) NOT NULL,
+    venue_id INT NOT NULL,
+    event_type VARCHAR(40) NOT NULL,
+    FOREIGN KEY (venue_id) REFERENCES venues(venue_id)
+);
 
-    -- Foreign keys
-    CONSTRAINT fk_student FOREIGN KEY (student_id) REFERENCES students(student_id),
-    CONSTRAINT fk_course FOREIGN KEY (course_id) REFERENCES courses(course_id)
+CREATE TABLE full_event (
+    event_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    venue_id INT NOT NULL,
+    booking_id INT NOT NULL,
+    sale_id INT,
+    event_type VARCHAR(40) NOT NULL,
+    event_organizer VARCHAR(80) NOT NULL,
+    FOREIGN KEY (venue_id) REFERENCES venues(venue_id),
+    FOREIGN KEY (booking_id) REFERENCES bookings(booking_id),
+    FOREIGN KEY (sale_id) REFERENCES ticket_sales(sale_id)
 );
 
 -- insert test data
-INSERT INTO students (name, age) VALUES 
-('Alice Johnson', 20),
-('Bob Smith', 22),
-('Charlie Brown', 19);
+-- Venues
+INSERT INTO venues (name) VALUES
+('Grand Convention Center'),
+('Downtown Concert Hall'),
+('Lakeside Pavilion'),
+('City Expo Grounds');
 
-INSERT INTO courses (course_name, credits) VALUES
-('Database Systems', 3),
-('Web Development', 4),
-('Data Structures', 3);
+-- Bookings
+INSERT INTO bookings (first_name, last_name, venue_id, event_type) VALUES
+('Alice', 'Johnson', 1, 'Conference'),
+('Michael', 'Smith', 2, 'Concert'),
+('Sophia', 'Lee', 3, 'Wedding'),
+('David', 'Brown', 4, 'Trade Show');
 
-INSERT INTO enrollments (student_id, course_id, enrollment_date) VALUES
-(1, 1, '2025-09-01'), -- Alice -> Database Systems
-(2, 2, '2025-09-02'), -- Bob -> Web Development
-(3, 3, '2025-09-03'), -- Charlie -> Data Structures
-(1, 2, '2025-09-04'); -- Alice -> Web Development too
+-- Ticket sales
+INSERT INTO ticket_sales (venue_id, event_date, number_sold) VALUES
+(1, '2025-09-10 09:00:00', 300),
+(2, '2025-09-15 19:00:00', 1200),
+(3, '2025-09-20 14:00:00', 150),
+(4, '2025-09-25 10:00:00', 800);
+
+-- Full events 
+INSERT INTO full_event (title, venue_id, booking_id, sale_id, event_type, event_organizer) VALUES
+('Tech Innovators 2025', 1, 1, 1, 'Conference', 'Alice Johnson'),
+('Rock the City Tour', 2, 2, 2, 'Concert', 'Michael Smith'),
+('Lee Wedding Celebration', 3, 3, 3, 'Wedding', 'Sophia Lee'),
+('Global Trade Expo', 4, 4, 4, 'Trade Show', 'David Brown');
 
 -- Commit 
 COMMIT;
-
--- Test
-SELECT * FROM students;
-SELECT * FROM courses;
-SELECT * FROM enrollments;
 
 
 
